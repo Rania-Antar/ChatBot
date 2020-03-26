@@ -1,0 +1,62 @@
+{
+  "name": "formbot",
+  "version": "1.0.0",
+  "description": "chatbot used as a form Pi Web",
+  "main": "app.js",
+  "scripts": {
+    "start": "node ./bin/www",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Rania-Antar/ChatBot.git"
+  },
+  "keywords": [
+    "ChatBot",
+    "Form",
+    "Pi",
+    "Web",
+    "Twin",
+    "NodeJs",
+    "MongoDB"
+  ],
+  "author": "Rania Antar <rania.antar@esprit.tn>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Rania-Antar/ChatBot/issues"
+  },
+  "homepage": "https://github.com/Rania-Antar/ChatBot#readme",
+  "dependencies": {
+    "apiai": "^4.0.3",
+    "bcrypt-nodejs": "0.0.3",
+    "circular-json": "^0.5.9",
+    "cookie-parser": "~1.4.3",
+    "cors": "^2.8.5",
+    "cloudinary": "^1.13.2",
+    "deasync": "^0.1.14",
+    "debug": "~2.6.9",
+    "dotenv": "^4.0.0",
+    "express": "^4.17.1",
+    "express-session": "^1.16.1",
+    "express-validator": "^5.3.1",
+    "express-form-data": "^2.0.6",
+    "http": "0.0.0",
+    "http-errors": "~1.6.2",
+    "http2": "^3.3.7",
+    "jsonwebtoken": "^8.5.1",
+    "ml-knn": "^2.1.3",
+    "moment": "^2.24.0",
+    "mongoose": "^5.4.15",
+    "mongoose-relationship": "^0.1.5",
+    "morgan": "~1.9.0",
+    "node-gmail-sender": "^1.1.6",
+    "node-sessionstorage": "^1.0.0",
+    "nodemailer": "^6.1.0",
+    "path": "^0.12.7",
+    "request": "^2.88.0",
+    "socket.io": "^2.2.0",
+    "twig": "^1.13.2",
+    "uuid": "^3.1.0",
+    "validator": "^10.11.0"
+  }
+}

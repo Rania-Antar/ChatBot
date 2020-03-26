@@ -1,0 +1,250 @@
+#!/usr/bin/env node
+
+var express = require('express');
+var lostObjectApi = require('.././services/lostObject');
+var lostObjectModel = require('.././models/lostObject');
+var app = express();
+const uuidv1 = require('uuid/v1');
+
+const storage = require('node-sessionstorage')
+storage.setItem('user', '')
+storage.setItem('lat', 0)
+storage.setItem('lng', 0)
+storage.setItem('eventName', '')
+
+
+const ACCESS_TOKEN = '072bf79d50ab43cfb87f1ef3cfe47e2f';
+const AI_SESSION_ID = uuidv1();
+
+const dialogflow = require('apiai');
+const ai = dialogflow(ACCESS_TOKEN);
+
+var app = require('../app');
+var debug = require('debug')('FormBot:server');
+var http = require('http');
+var port = normalizePort(process.env.PORT || '3000');
+app.set('port', port);
+var server = http.createServer(app);
+server.listen(port);
+server.on('error', onError);
+server.on('listening', onListening);
+
+const socketio = require('socket.io')(server);
+
+socketio.on('connection', function (socket) {
+  console.log('a user connected');
+});
+
+var lostObjectP = {
+  name: "",
+  description: "",
+  where_found: "",
+  where_to_get: "",
+  looking_for: false,
+  found: false,
+  created_by: ''
+};
+
+socketio.on('connection', function (socket) {
+  socket.on('chat request', (text) => {
+
+    let aiReq = ai.textRequest(text, {
+      sessionId: AI_SESSION_ID
+    });
+
+    aiReq.on('response', (response) => {
+      console.log('response: ' + response);
+      let aiResponse = response.result.fulfillment.speech;
+
+
+                  /************************** Lost object *************************/
+                 if (response.result.metadata.intentName === "lost_objects - add - name") {
+                      socket.emit('ai response', aiResponse);
+                      lostObjectP.name= response.result.parameters.name;
+                  }
+
+                  else if (response.result.metadata.intentName === "lost_objects - add - name - description") {
+                      socket.emit('ai response', aiResponse);
+                      lostObjectP.description = response.result.parameters.description;
+                  }
+                  else if (response.result.metadata.intentName === "lost_objects - add - name - description - where found") {
+                      socket.emit('ai response', aiResponse);
+                      lostObjectP.where_found = response.result.parameters.place;
+                  }
+
+                  else if (response.result.metadata.intentName === "lost_objects - add - name - description - where found - no") {
+                      socket.emit('ai response', aiResponse);
+                      lostObjectP.where_to_get = storage.getItem('user').first_name + " " + storage.getItem('user').last_name +" | email : "+storage.getItem('user').email;
+                  }
+                  else if (response.result.metadata.intentName === "lost_objects - add - name - description - where found - where to get - looking_for_no") {
+                      socket.emit('ai response', aiResponse);
+                      lostObjectP.looking_for = false;
+                      const lb = new lostObjectModel.model({
+                          name: lostObjectP.name,
+                          description: lostObjectP.description,
+                          where_found: lostObjectP.where_found,
+                          where_to_get: lostObjectP.where_to_get,
+                          looking_for: lostObjectP.looking_for,
+                          found: lostObjectP.found,
+                          created_by: storage.getItem('user'),
+                      });
+
+                      if (lostObjectApi.add(lb) !== "error") {
+                          socket.emit('ai response', {
+                              msg: "Please pick some  pictures",
+                              page: "lostObjectPage",
+                              id: lb
+                          });
+                      } else {
+                          socket.emit('ai response', {msg: "error , we couldn't handle your request"});
+                      }
+                  }
+                  else if (response.result.metadata.intentName === "lost_objects - add - name - description - where found - where to get - looking_for_yes") {
+                      socket.emit('ai response', aiResponse);
+                      lostObjectP.looking_for = true;
+                      const lb = new lostObjectModel.model({
+                          name: lostObjectP.name,
+                          description: lostObjectP.description,
+                          where_found: lostObjectP.where_found,
+                          where_to_get: lostObjectP.where_to_get,
+                          looking_for: lostObjectP.looking_for,
+                          found: lostObjectP.found,
+                          created_by: storage.getItem('user'),
+                  });
+                    if (lostObjectApi.add(lb) !== "error") {
+                        socket.emit('ai response', {
+                            msg: "Please pick some  pictures",
+                            page: "lostObjectPage",
+                            id: lb
+                        });
+                    } else {
+                        socket.emit('ai response', {msg: "error , we couldn't handle your request"});
+                    }
+                  }
+                  else if (response.result.metadata.intentName === "lost_objects - add - name - description - where found - no - looking_for") {
+                      socket.emit('ai response', aiResponse);
+                      lostObjectP.looking_for = true;
+                      const lb = new lostObjectModel.model({
+                          name: lostObjectP.name,
+                          description: lostObjectP.description,
+                          where_found: lostObjectP.where_found,
+                          where_to_get: lostObjectP.where_to_get,
+                          looking_for: lostObjectP.looking_for,
+                          found: lostObjectP.found,
+                          created_by: storage.getItem('user'),
+                  });
+                    if (lostObjectApi.add(lb) !== "error") {
+                        socket.emit('ai response', {
+                            msg: "Please pick some  pictures",
+                            page: "lostObjectPage",
+                            id: lb
+                        });
+                    } else {
+                        socket.emit('ai response', {msg: "error , we couldn't handle your request"});
+                    }
+                  }
+                  else if (response.result.metadata.intentName === "lost_objects - add - name - description - where found - no - looking_for_no") {
+                      socket.emit('ai response', aiResponse);
+                      lostObjectP.looking_for = false;
+                      const lb = new lostObjectModel.model({
+                          name: lostObjectP.name,
+                          description: lostObjectP.description,
+                          where_found: lostObjectP.where_found,
+                          where_to_get: lostObjectP.where_to_get,
+                          looking_for: lostObjectP.looking_for,
+                          found: lostObjectP.found,
+                          created_by: storage.getItem('user'),
+                  });
+                        if (lostObjectApi.add(lb) !== "error") {
+                    socket.emit('ai response', {
+                        msg: "Please pick some  pictures",
+                        page: "lostObjectPage",
+                        id: lb
+                    });
+                } else {
+                    socket.emit('ai response', {msg: "error , we couldn't handle your request"});
+                }
+                  }
+
+                  else if (response.result.metadata.intentName === "lost_objects - show - all") {
+                      const losts = lostObjectApi.findAll();
+                      if (losts !== "error") {
+                          socket.emit('ai response', {msg: 'You will find the list of object in the right of the screen', page:"LostObjects", id:losts})
+                      } else {
+                          socket.emit('ai response', {msg: "error , we couldn't handle your request"});
+
+                      }
+                  }
+
+                  else if (response.result.metadata.intentName === "lost_objects - show - category - get"){
+                      const losts = lostObjectApi.findBy(response.result.parameters.data);
+                if (losts !== "error") {
+                    socket.emit('ai response', {msg: 'You will find the list of object in the right of the screen', page:"LostObjects", id:losts})
+                } else {
+                    socket.emit('ai response', {msg: "error , we couldn't handle your request"});
+
+                }
+                  }
+
+      /***************************** Else ******************************/
+      else {
+        console.log(response.result)
+
+        socket.emit('ai response', aiResponse);
+
+      }
+
+    })
+    ;
+
+    aiReq.on('error', (error) => {
+      console.log(error);
+    });
+
+    aiReq.end();
+
+  });
+});
+
+function normalizePort(val) {
+  var port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    return val;
+  }
+  if (port >= 0) {
+    return port;
+  }
+  return false;
+}
+
+function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  var bind = typeof port === 'string'
+    ? 'Pipe ' + port
+    : 'Port ' + port;
+
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+function onListening() {
+  var addr = server.address();
+  var bind = typeof addr === 'string'
+    ? 'pipe ' + addr
+    : 'port ' + addr.port;
+  debug('Listening on ' + bind);
+}
